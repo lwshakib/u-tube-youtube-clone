@@ -73,9 +73,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0f0f0f] text-white">
+    <div className="h-screen overflow-hidden bg-[#0f0f0f] text-white">
       <Header onMenuClick={handleMenuClick} />
-      <div className="flex min-h-screen w-full pt-14">
+      <div className="flex h-full w-full pt-14">
         <Sidebar
           isOpen={isMobile ? sidebarOpen : true}
           isCollapsed={sidebarCollapsed}
@@ -87,9 +87,10 @@ export default function Home() {
         <motion.main
           layout
           transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="min-w-0 flex-1 px-4 pb-12 sm:px-6 lg:px-10"
+          className="min-w-0 flex-1 overflow-y-auto px-4 pb-12 sm:px-6 lg:px-10"
+          style={{ height: "calc(100vh - 56px)" }}
         >
-          <div className="sticky top-14 z-20 border-b border-white/5 bg-[#0f0f0f] pb-2">
+          <div className="sticky top-0 z-20 border-b border-white/5 bg-[#0f0f0f] pb-2">
             <FilterChips
               chips={filters}
               activeChip={activeFilter}
