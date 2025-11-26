@@ -1,13 +1,11 @@
 "use client";
 
-import type { ComponentType } from "react";
-import { useMemo, useState } from "react";
-import Image from "next/image";
+import type { Subscription } from "@/lib/mockData";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronDown,
-  Clock3,
   Clapperboard,
+  Clock3,
   GraduationCap,
   History,
   Home,
@@ -16,7 +14,9 @@ import {
   PlusSquare,
   ThumbsUp,
 } from "lucide-react";
-import type { Subscription } from "@/lib/mockData";
+import Image from "next/image";
+import type { ComponentType } from "react";
+import { useMemo, useState } from "react";
 
 type SidebarProps = {
   isOpen: boolean;
@@ -24,6 +24,7 @@ type SidebarProps = {
   isMobile: boolean;
   onClose: () => void;
   subscriptions: Subscription[];
+  hasUser?: boolean;
 };
 
 const primaryNav = [
@@ -47,20 +48,31 @@ const Sidebar = ({
   isMobile,
   onClose,
   subscriptions,
+  hasUser,
 }: SidebarProps) => {
   const [expanded, setExpanded] = useState(false);
   const collapsed = !isMobile && isCollapsed;
 
+  const primaryItems = useMemo(
+    () =>
+      hasUser
+        ? primaryNav
+        : primaryNav.filter(
+            (item) => item.label === "Home" || item.label === "Shorts"
+          ),
+    [hasUser]
+  );
+
   const visibleSubscriptions = useMemo(
     () => (expanded ? subscriptions : subscriptions.slice(0, 7)),
-    [expanded, subscriptions],
+    [expanded, subscriptions]
   );
 
   const navContent = (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto px-2 py-4">
         <nav className="flex flex-col gap-2">
-          {primaryNav.map((item) => (
+          {primaryItems.map((item) => (
             <SidebarButton
               key={item.label}
               label={item.label}
@@ -71,65 +83,77 @@ const Sidebar = ({
           ))}
         </nav>
 
-        <Separator isCollapsed={collapsed} />
+        {hasUser && (
+          <>
+            <Separator isCollapsed={collapsed} />
 
-        <SectionLabel isCollapsed={collapsed} label="You" />
-        <nav className="mt-2 flex flex-col gap-1">
-          {youNav.map((item) => (
-            <SidebarButton
-              key={item.label}
-              label={item.label}
-              Icon={item.icon}
-              isCollapsed={collapsed}
-            />
-          ))}
-        </nav>
+            <SectionLabel isCollapsed={collapsed} label="You" />
+            <nav className="mt-2 flex flex-col gap-1">
+              {youNav.map((item) => (
+                <SidebarButton
+                  key={item.label}
+                  label={item.label}
+                  Icon={item.icon}
+                  isCollapsed={collapsed}
+                />
+              ))}
+            </nav>
 
-        <Separator isCollapsed={collapsed} />
+            <Separator isCollapsed={collapsed} />
 
-        <SectionLabel isCollapsed={collapsed} label="Subscriptions" />
-        <div className="mt-2 flex flex-col gap-1">
-          {visibleSubscriptions.map((sub) => (
-            <button
-              key={sub.name}
-              type="button"
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/70 ${collapsed ? "justify-center" : ""}`}
-              aria-label={collapsed ? sub.name : undefined}
-            >
-              <Image
-                src={sub.avatar}
-                alt={sub.name}
-                width={24}
-                height={24}
-                className="h-6 w-6 rounded-full object-cover"
-                unoptimized
-              />
-              <div
-                className={`flex flex-1 items-center text-left text-[13px] ${collapsed ? "sr-only" : ""}`}
+            <SectionLabel isCollapsed={collapsed} label="Subscriptions" />
+            <div className="mt-2 flex flex-col gap-1">
+              {visibleSubscriptions.map((sub) => (
+                <button
+                  key={sub.name}
+                  type="button"
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/70 ${
+                    collapsed ? "justify-center" : ""
+                  }`}
+                  aria-label={collapsed ? sub.name : undefined}
+                >
+                  <Image
+                    src={sub.avatar}
+                    alt={sub.name}
+                    width={24}
+                    height={24}
+                    className="h-6 w-6 rounded-full object-cover"
+                    unoptimized
+                  />
+                  <div
+                    className={`flex flex-1 items-center text-left text-[13px] ${
+                      collapsed ? "sr-only" : ""
+                    }`}
+                  >
+                    <span className="truncate">{sub.name}</span>
+                    {sub.isLive && (
+                      <span className="ml-2 rounded-full bg-red-600 px-2 text-[10px] font-semibold uppercase">
+                        Live
+                      </span>
+                    )}
+                  </div>
+                </button>
+              ))}
+              <button
+                type="button"
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 ${
+                  collapsed ? "justify-center" : ""
+                }`}
+                onClick={() => setExpanded((prev) => !prev)}
+                aria-label="Toggle subscriptions"
               >
-                <span className="truncate">{sub.name}</span>
-                {sub.isLive && (
-                  <span className="ml-2 rounded-full bg-red-600 px-2 text-[10px] font-semibold uppercase">
-                    Live
-                  </span>
-                )}
-              </div>
-            </button>
-          ))}
-          <button
-            type="button"
-            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 ${collapsed ? "justify-center" : ""}`}
-            onClick={() => setExpanded((prev) => !prev)}
-            aria-label="Toggle subscriptions"
-          >
-            <ChevronDown
-              className={`h-5 w-5 text-white/70 transition-transform ${expanded ? "rotate-180" : ""}`}
-            />
-            <span className={collapsed ? "sr-only" : ""}>
-              {expanded ? "Show less" : "Show more"}
-            </span>
-          </button>
-        </div>
+                <ChevronDown
+                  className={`h-5 w-5 text-white/70 transition-transform ${
+                    expanded ? "rotate-180" : ""
+                  }`}
+                />
+                <span className={collapsed ? "sr-only" : ""}>
+                  {expanded ? "Show less" : "Show more"}
+                </span>
+              </button>
+            </div>
+          </>
+        )}
       </div>
       <div className="px-3 pb-4 text-[11px] text-white/50">
         {!collapsed && (
@@ -194,7 +218,9 @@ const SidebarButton = ({
   <button
     type="button"
     aria-label={isCollapsed ? label : undefined}
-    className={`flex w-full items-center gap-4 rounded-xl px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/70 ${isActive ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10"} ${isCollapsed ? "justify-center" : ""}`}
+    className={`flex w-full items-center gap-4 rounded-xl px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/70 ${
+      isActive ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10"
+    } ${isCollapsed ? "justify-center" : ""}`}
   >
     <Icon className="h-5 w-5" />
     <span className={isCollapsed ? "sr-only" : "whitespace-nowrap"}>
@@ -211,16 +237,20 @@ const SectionLabel = ({
   isCollapsed: boolean;
 }) => (
   <p
-    className={`px-3 text-[12px] font-semibold uppercase tracking-wide text-white/50 ${isCollapsed ? "sr-only" : ""}`}
+    className={`px-3 text-[12px] font-semibold uppercase tracking-wide text-white/50 ${
+      isCollapsed ? "sr-only" : ""
+    }`}
   >
     {label}
   </p>
 );
 
 const Separator = ({ isCollapsed }: { isCollapsed: boolean }) => (
-  <div className={`my-3 border-t border-white/5 ${isCollapsed ? "mx-auto w-10" : ""}`} />
+  <div
+    className={`my-3 border-t border-white/5 ${
+      isCollapsed ? "mx-auto w-10" : ""
+    }`}
+  />
 );
 
 export default Sidebar;
-
-

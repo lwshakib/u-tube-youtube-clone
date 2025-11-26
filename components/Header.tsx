@@ -1,15 +1,26 @@
 "use client";
 
-import { ArrowLeft, Bell, Menu, Mic, Plus, Search } from "lucide-react";
+import {
+  ArrowLeft,
+  Bell,
+  Menu,
+  Mic,
+  Plus,
+  Search,
+  UserRound,
+} from "lucide-react";
+import type { User } from "next-auth";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaYoutube } from "react-icons/fa";
 
 type HeaderProps = {
   onMenuClick: () => void;
+  user?: User | null;
 };
 
-const Header = ({ onMenuClick }: HeaderProps) => {
+const Header = ({ onMenuClick, user }: HeaderProps) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   useEffect(() => {
@@ -94,29 +105,42 @@ const Header = ({ onMenuClick }: HeaderProps) => {
               >
                 <Mic size={20} />
               </button>
-              <button
-                type="button"
-                aria-label="Create"
-                className="hidden h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10 md:flex"
-              >
-                <Plus size={18} />
-                Create
-              </button>
-              <button
-                type="button"
-                aria-label="Notifications"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#181818] text-white transition-colors hover:bg-white/15"
-              >
-                <Bell size={20} />
-              </button>
-              <Image
-                src="https://i.pravatar.cc/64?img=10"
-                alt="Profile avatar"
-                width={32}
-                height={32}
-                className="h-8 w-8 rounded-full"
-                unoptimized
-              />
+              {user ? (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Create"
+                    className="hidden h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10 md:flex"
+                  >
+                    <Plus size={18} />
+                    Create
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Notifications"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#181818] text-white transition-colors hover:bg-white/15"
+                  >
+                    <Bell size={20} />
+                  </button>
+                  <Image
+                    src={user.image ?? "https://i.pravatar.cc/64?img=10"}
+                    alt={user.name ?? "Profile avatar"}
+                    width={32}
+                    height={32}
+                    className="h-8 w-8 rounded-full"
+                    unoptimized
+                  />
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => signIn("google")}
+                  className="flex items-center gap-2 rounded-full border border-white/10 bg-transparent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
+                >
+                  <UserRound size={18} />
+                  Sign in
+                </button>
+              )}
             </div>
           </>
         ) : (
