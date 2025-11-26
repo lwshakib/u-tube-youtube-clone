@@ -163,7 +163,7 @@ const Sidebar = ({
               aria-label="Close sidebar"
             />
             <motion.aside
-              className="fixed inset-y-0 left-0 z-50 w-[240px] bg-[#0f0f0f]"
+              className="fixed bottom-0 left-0 z-50 h-[calc(100vh-56px)] w-[240px] bg-[#0f0f0f]"
               initial={{ x: -240 }}
               animate={{ x: 0 }}
               exit={{ x: -240 }}
