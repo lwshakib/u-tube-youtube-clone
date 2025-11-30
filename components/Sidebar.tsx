@@ -15,22 +15,24 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type SidebarProps = {
   isOpen: boolean;
   isCollapsed: boolean;
   isMobile: boolean;
   onClose: () => void;
-  subscriptions: Subscription[];
+  subscriptions?: Subscription[];
   hasUser?: boolean;
 };
 
 const primaryNav = [
-  { label: "Home", icon: Home, active: true },
-  { label: "Shorts", icon: Clapperboard },
-  { label: "Subscriptions", icon: PlaySquare },
+  { label: "Home", icon: Home, href: "/" },
+  { label: "Shorts", icon: Clapperboard, href: "/shorts" },
+  { label: "Subscriptions", icon: PlaySquare, href: "/feed/subscriptions" },
 ];
 
 const youNav = [
@@ -52,6 +54,60 @@ const Sidebar = ({
 }: SidebarProps) => {
   const [expanded, setExpanded] = useState(false);
   const collapsed = !isMobile && isCollapsed;
+  const pathname = usePathname();
+
+  const [fetchedSubscriptions, setFetchedSubscriptions] = useState<
+    Subscription[]
+  >(subscriptions ?? []);
+
+  useEffect(() => {
+    if (!hasUser) return;
+
+    const fetchSubscriptions = async () => {
+      try {
+        const res = await fetch("/api/subscriptions/list");
+
+        if (!res.ok) {
+          console.error(
+            "Failed to fetch YouTube subscriptions from API route",
+            await res.text()
+          );
+          return;
+        }
+
+        const data = await res.json();
+        const items = (data?.items ?? []) as Array<{
+          snippet?: {
+            title?: string;
+            thumbnails?: {
+              default?: { url?: string };
+              high?: { url?: string };
+            };
+          };
+        }>;
+
+        const mapped: Subscription[] = items.map((item) => ({
+          name: item.snippet?.title ?? "Unknown channel",
+          avatar:
+            item.snippet?.thumbnails?.default?.url ??
+            item.snippet?.thumbnails?.high?.url ??
+            "https://i.pravatar.cc/64?img=10",
+          isLive: false,
+        }));
+
+        if (mapped.length > 0) {
+          setFetchedSubscriptions(mapped);
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching YouTube subscriptions from API route",
+          error
+        );
+      }
+    };
+
+    void fetchSubscriptions();
+  }, [hasUser]);
 
   const primaryItems = useMemo(
     () =>
@@ -64,21 +120,22 @@ const Sidebar = ({
   );
 
   const visibleSubscriptions = useMemo(
-    () => (expanded ? subscriptions : subscriptions.slice(0, 7)),
-    [expanded, subscriptions]
+    () => (expanded ? fetchedSubscriptions : fetchedSubscriptions.slice(0, 7)),
+    [expanded, fetchedSubscriptions]
   );
 
   const navContent = (
-    <div className="flex h-full flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-2 py-4">
+    <div className="flex h-full flex-col overflow-hidden ">
+      <div className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-4">
         <nav className="flex flex-col gap-2">
           {primaryItems.map((item) => (
             <SidebarButton
               key={item.label}
               label={item.label}
               Icon={item.icon}
-              isActive={item.active}
+              isActive={pathname === item.href}
               isCollapsed={collapsed}
+              href={item.href}
             />
           ))}
         </nav>
@@ -207,6 +264,7 @@ type SidebarButtonProps = {
   Icon: ComponentType<{ className?: string }>;
   isActive?: boolean;
   isCollapsed: boolean;
+  href?: string;
 };
 
 const SidebarButton = ({
@@ -214,19 +272,41 @@ const SidebarButton = ({
   Icon,
   isActive,
   isCollapsed,
+  href,
 }: SidebarButtonProps) => (
-  <button
-    type="button"
-    aria-label={isCollapsed ? label : undefined}
-    className={`flex w-full items-center gap-4 rounded-xl px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/70 ${
-      isActive ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10"
-    } ${isCollapsed ? "justify-center" : ""}`}
-  >
-    <Icon className="h-5 w-5" />
-    <span className={isCollapsed ? "sr-only" : "whitespace-nowrap"}>
-      {label}
-    </span>
-  </button>
+  <>
+    {href ? (
+      <Link
+        href={href}
+        aria-label={isCollapsed ? label : undefined}
+        className={`flex w-full items-center gap-4 rounded-xl px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/70 ${
+          isActive
+            ? "bg-white/10 text-white"
+            : "text-white/80 hover:bg-white/10"
+        } ${isCollapsed ? "justify-center" : ""}`}
+      >
+        <Icon className="h-5 w-5" />
+        <span className={isCollapsed ? "sr-only" : "whitespace-nowrap"}>
+          {label}
+        </span>
+      </Link>
+    ) : (
+      <button
+        type="button"
+        aria-label={isCollapsed ? label : undefined}
+        className={`flex w-full items-center gap-4 rounded-xl px-3 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/70 ${
+          isActive
+            ? "bg-white/10 text-white"
+            : "text-white/80 hover:bg-white/10"
+        } ${isCollapsed ? "justify-center" : ""}`}
+      >
+        <Icon className="h-5 w-5" />
+        <span className={isCollapsed ? "sr-only" : "whitespace-nowrap"}>
+          {label}
+        </span>
+      </button>
+    )}
+  </>
 );
 
 const SectionLabel = ({

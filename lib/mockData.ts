@@ -37,59 +37,6 @@ export const filters = [
   "New to you",
 ];
 
-export const subscriptions: Subscription[] = [
-  {
-    name: "TEDx Talks",
-    avatar: "https://i.pravatar.cc/64?img=12",
-    isLive: false,
-  },
-  {
-    name: "3Blue1Brown",
-    avatar: "https://i.pravatar.cc/64?img=33",
-    isLive: true,
-  },
-  {
-    name: "Academic English",
-    avatar: "https://i.pravatar.cc/64?img=47",
-    isLive: false,
-  },
-  {
-    name: "Math & Science Nerds",
-    avatar: "https://i.pravatar.cc/64?img=18",
-    isLive: false,
-  },
-  {
-    name: "Code Consistency",
-    avatar: "https://i.pravatar.cc/64?img=54",
-    isLive: false,
-  },
-  {
-    name: "Chai aur Code",
-    avatar: "https://i.pravatar.cc/64?img=23",
-    isLive: true,
-  },
-  {
-    name: "Focusphere",
-    avatar: "https://i.pravatar.cc/64?img=41",
-    isLive: false,
-  },
-  {
-    name: "Hasan Study Wave",
-    avatar: "https://i.pravatar.cc/64?img=9",
-    isLive: false,
-  },
-  {
-    name: "Sony AATH",
-    avatar: "https://i.pravatar.cc/64?img=61",
-    isLive: false,
-  },
-  {
-    name: "Web Prodigies",
-    avatar: "https://i.pravatar.cc/64?img=65",
-    isLive: true,
-  },
-];
-
 export const videos: Video[] = [
   {
     id: "nextjs-fullstack",

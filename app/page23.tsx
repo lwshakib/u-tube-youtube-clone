@@ -4,7 +4,7 @@ import FilterChips from "@/components/FilterChips";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import VideoCard from "@/components/VideoCard";
-import { filters, subscriptions, videos } from "@/lib/mockData";
+import { filters, videos } from "@/lib/mockData";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
@@ -81,7 +81,6 @@ export default function Home() {
           isCollapsed={sidebarCollapsed}
           isMobile={isMobile}
           onClose={() => setSidebarOpen(false)}
-          subscriptions={subscriptions}
         />
 
         <motion.main
